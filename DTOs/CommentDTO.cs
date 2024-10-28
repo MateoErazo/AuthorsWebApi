@@ -7,6 +7,5 @@ namespace AuthorsWebApi.DTOs
     {
         public int Id { get; set; }
         public string Content { get; set; }
-        public BookDTO Book { get; set; }
     }
 }

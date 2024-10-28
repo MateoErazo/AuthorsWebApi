@@ -144,3 +144,4 @@ C:\dotnet-apis-course\AuthorsWebApi\AuthorsWebApi\bin\Debug\net8.0\runtimes\win\
 C:\dotnet-apis-course\AuthorsWebApi\AuthorsWebApi\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\dotnet-apis-course\AuthorsWebApi\AuthorsWebApi\bin\Debug\net8.0\AuthorsWebApi.staticwebassets.runtime.json
 C:\dotnet-apis-course\AuthorsWebApi\AuthorsWebApi\bin\Debug\net8.0\AutoMapper.dll
+C:\dotnet-apis-course\AuthorsWebApi\AuthorsWebApi\obj\Debug\net8.0\AuthorsWebApi.sourcelink.json

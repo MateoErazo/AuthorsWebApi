@@ -26,7 +26,7 @@ namespace AuthorsWebApi.Controllers
         }
 
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name ="GetBookById")]
         public async Task<ActionResult<BookWithAuthorsDTO>> GetBookById(int id)
         {
             Book book = await dbContext.Books
@@ -75,7 +75,8 @@ namespace AuthorsWebApi.Controllers
 
             dbContext.Add(book);
             await dbContext.SaveChangesAsync();
-            return Ok(book);
+            BookDTO bookDTO = mapper.Map<BookDTO>(book);
+            return CreatedAtRoute("GetBookById", new {id = book.Id}, bookDTO);
         }
 
 

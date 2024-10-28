@@ -24,6 +24,7 @@ namespace AuthorsWebApi.Utils
                 .ForMember(bookDTO => bookDTO.Authors, options => options.MapFrom(MapBookAuthors));
             CreateMap<CommentCreationDTO, Comment>();
             CreateMap<Comment, CommentDTO>();
+            CreateMap<Comment, CommentWithBookDTO>();
         }
 
         private List<BookDTO> MapAuthorBooks(Author author, AuthorWithBooksDTO authorWithBooksDTO)

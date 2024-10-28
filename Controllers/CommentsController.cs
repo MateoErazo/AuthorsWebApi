@@ -8,7 +8,7 @@ namespace AuthorsWebApi.Controllers
 {
     [ApiController]
     [Route("api/books/{bookId:int}/comments")]
-    public class CommentsController:ControllerBase
+    public class CommentsController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
         private readonly IMapper mapper;
@@ -37,6 +37,20 @@ namespace AuthorsWebApi.Controllers
             return mapper.Map<List<CommentDTO>>(comments);
         }
 
+        [HttpGet("{id:int}", Name ="GetCommentById")]
+        public async Task<ActionResult<CommentWithBookDTO>> GetCommentById(int id)
+        {
+            Comment comment = await dbContext.Comments
+                .Include(x => x.Book)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (comment == null) {
+                return NotFound($"Don't exist a comment with id {id}.");
+            }
+
+            return mapper.Map<CommentWithBookDTO>(comment);
+        }
+
         [HttpPost]
         public async Task<ActionResult> Create(int bookId, CommentCreationDTO commentCreationDTO)
         {
@@ -50,7 +64,9 @@ namespace AuthorsWebApi.Controllers
             comment.BookId = bookId;
             dbContext.Add(comment);
             await dbContext.SaveChangesAsync();
-            return Ok();
+
+            CommentDTO commentDTO = mapper.Map<CommentDTO>(comment);
+            return CreatedAtRoute("GetCommentById", new {bookId = comment.BookId, id = comment.Id}, commentDTO);
         }
     }
 }

@@ -59,7 +59,8 @@
         ],
         "StatusCode": 200
       }
-    ]
+    ],
+    "EndpointName": "GetAuthorById"
   },
   {
     "ContainingType": "AuthorsWebApi.Controllers.AuthorsController",
@@ -208,6 +209,38 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "AuthorsWebApi.Controllers.CommentsController",
+    "Method": "GetCommentById",
+    "RelativePath": "api/books/{bookId}/comments/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "bookId",
+        "Type": "",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "AuthorsWebApi.DTOs.CommentWithBookDTO",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "GetCommentById"
+  },
+  {
     "ContainingType": "AuthorsWebApi.Controllers.BooksController",
     "Method": "GetBookById",
     "RelativePath": "api/books/{id}",
@@ -231,6 +264,7 @@
         ],
         "StatusCode": 200
       }
-    ]
+    ],
+    "EndpointName": "GetBookById"
   }
 ]
