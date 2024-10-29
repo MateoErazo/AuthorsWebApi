@@ -68,5 +68,31 @@ namespace AuthorsWebApi.Controllers
             CommentDTO commentDTO = mapper.Map<CommentDTO>(comment);
             return CreatedAtRoute("GetCommentById", new {bookId = comment.BookId, id = comment.Id}, commentDTO);
         }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> UpdateComment(int bookId, int id, CommentCreationDTO commentCreationDTO)
+        {
+            bool bookExist = await dbContext.Books.AnyAsync(x => x.Id == bookId);
+
+            if (!bookExist)
+            {
+                return NotFound($"Does not exist a book with id {bookId}");
+            }
+
+            bool commentExist = await dbContext.Comments.AnyAsync(x => x.Id == id);
+
+            if (!commentExist) {
+                return NotFound($"Don't exist a comment with id {id}.");
+            }
+
+            Comment comment = mapper.Map<Comment>(commentCreationDTO);
+            comment.BookId = bookId;
+            comment.Id = id;
+
+            dbContext.Update(comment);
+            await dbContext.SaveChangesAsync();
+            return NoContent();
+
+        }
     }
 }

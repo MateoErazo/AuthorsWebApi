@@ -68,12 +68,8 @@ namespace AuthorsWebApi.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Update(Author author, int id)
+        public async Task<ActionResult> Update(AuthorCreationDTO authorCreationDTO, int id)
         {
-            if (author.Id != id)
-            {
-                return BadRequest("The author id don't match with the id of url.");
-            }
 
             bool authorExist = await dbContext.Authors.AnyAsync(author => author.Id == id);
 
@@ -81,9 +77,12 @@ namespace AuthorsWebApi.Controllers
                 return NotFound($"The author with id {id} don't exist.");
             }
 
+            Author author = mapper.Map<Author>(authorCreationDTO);
+            author.Id = id;
+
             dbContext.Authors.Update(author);
             await dbContext.SaveChangesAsync();
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete("{id:int}")]
