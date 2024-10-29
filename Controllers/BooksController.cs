@@ -44,7 +44,7 @@ namespace AuthorsWebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateNew(BookCreationDTO bookCreationDTO)
+        public async Task<ActionResult> Create(BookCreationDTO bookCreationDTO)
         {
             if(bookCreationDTO.AuthorIds == null || bookCreationDTO.AuthorIds.Count == 0)
             {
@@ -68,10 +68,7 @@ namespace AuthorsWebApi.Controllers
                 return BadRequest("An unexpected error occurred. Please contact the help desk.");
             }
 
-            for (int i = 0; i < book.BookAuthor.Count; i++)
-            {
-                book.BookAuthor[i].Order = i;
-            }
+            SetAuthorsOrder(book);
 
             dbContext.Add(book);
             await dbContext.SaveChangesAsync();
@@ -79,6 +76,33 @@ namespace AuthorsWebApi.Controllers
             return CreatedAtRoute("GetBookById", new {id = book.Id}, bookDTO);
         }
 
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Update(int id, BookCreationDTO bookCreationDTO)
+        {
+            Book book = await dbContext.Books
+                .Include(x => x.BookAuthor)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
+            if (book == null) {
+                return NotFound($"Don't exist a book with id {id}.");
+            }
+
+            book = mapper.Map(bookCreationDTO, book);
+            SetAuthorsOrder (book);
+
+            await dbContext.SaveChangesAsync();
+            return NoContent();
+        }
+
+        private void SetAuthorsOrder(Book book)
+        {
+            if(book.BookAuthor != null && book.BookAuthor.Count != 0)
+            {
+                for (int i = 0; i < book.BookAuthor.Count; i++)
+                {
+                    book.BookAuthor[i].Order = i;
+                }
+            }
+        }
     }
 }
