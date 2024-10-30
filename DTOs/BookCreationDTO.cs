@@ -1,5 +1,6 @@
 ﻿using AuthorsWebApi.Validations;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 
 namespace AuthorsWebApi.DTOs
 {
@@ -9,5 +10,6 @@ namespace AuthorsWebApi.DTOs
         [FirstCapitalLetter]
         public string Title { get; set; }
         public List<int> AuthorIds { get; set; }
+        public DateTime PublicationDate { get; set; }
     }
 }

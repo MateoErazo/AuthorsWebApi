@@ -124,6 +124,21 @@ namespace AuthorsWebApi.Controllers
             return NoContent();
         }
 
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            bool bookExist = await dbContext.Books.AnyAsync(x => x.Id == id);
+
+            if (!bookExist)
+            {
+                return NotFound($"Don't exist a book with id {id}.");
+            }
+
+            dbContext.Remove(new Book() {Id = id});
+            await dbContext.SaveChangesAsync();
+            return NoContent();
+        }
+
         private void SetAuthorsOrder(Book book)
         {
             if(book.BookAuthor != null && book.BookAuthor.Count != 0)
