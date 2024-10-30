@@ -1,8 +1,10 @@
 ﻿using AuthorsWebApi.DTOs;
 using AuthorsWebApi.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 
 namespace AuthorsWebApi.Controllers
 {
@@ -90,6 +92,34 @@ namespace AuthorsWebApi.Controllers
             book = mapper.Map(bookCreationDTO, book);
             SetAuthorsOrder (book);
 
+            await dbContext.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult> PartialUpdate(int id, JsonPatchDocument<BookPatchDTO> patchDocument)
+        {
+            if (patchDocument == null)
+            {
+                return BadRequest("Something went wrong. Please check your request.");
+            }
+
+            Book bookDB = await dbContext.Books.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (bookDB == null) {
+                return NotFound($"Don't exist a book with id {id}.");
+            }
+
+            BookPatchDTO bookPatchDTO = mapper.Map<BookPatchDTO>(bookDB);
+            patchDocument.ApplyTo(bookPatchDTO, ModelState);
+
+            bool isValid = TryValidateModel(bookPatchDTO);
+
+            if (!isValid) {
+                return BadRequest(ModelState);
+            }
+
+            mapper.Map(bookPatchDTO, bookDB);
             await dbContext.SaveChangesAsync();
             return NoContent();
         }

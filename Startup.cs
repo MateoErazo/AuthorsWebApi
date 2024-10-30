@@ -22,7 +22,8 @@ namespace AuthorsWebApi
                 options.Filters.Add(typeof(MyGlobalExceptionFilter));
             })
                 .AddJsonOptions(options => 
-                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles)
+                .AddNewtonsoftJson();
 
             services.AddDbContext<ApplicationDbContext>( options =>
             {
