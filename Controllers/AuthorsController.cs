@@ -1,6 +1,8 @@
 ﻿using AuthorsWebApi.DTOs;
 using AuthorsWebApi.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +21,7 @@ namespace AuthorsWebApi.Controllers
             this.mapper = mapper;
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
         public async Task<ActionResult<List<AuthorDTO>>> GetAll()
         {
