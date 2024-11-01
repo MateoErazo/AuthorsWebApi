@@ -1,4 +1,6 @@
 ﻿using AuthorsWebApi.DTOs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +12,7 @@ namespace AuthorsWebApi.Controllers
 {
     [ApiController]
     [Route("api/accounts")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AccountsController:ControllerBase
     {
         private readonly UserManager<IdentityUser> userManager;
@@ -46,6 +49,7 @@ namespace AuthorsWebApi.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<AccountCreationResponseDTO>> Login(UserCredentialsDTO userCredentialsDTO)
         {

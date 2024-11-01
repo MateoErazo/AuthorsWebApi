@@ -1,6 +1,8 @@
 ﻿using AuthorsWebApi.DTOs;
 using AuthorsWebApi.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,7 @@ namespace AuthorsWebApi.Controllers
 {
     [ApiController]
     [Route("api/books")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class BooksController: ControllerBase
     {
         private readonly ApplicationDbContext dbContext;

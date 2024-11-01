@@ -10,6 +10,7 @@ namespace AuthorsWebApi.Controllers
 {
     [ApiController]
     [Route("api/authors")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AuthorsController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
@@ -21,7 +22,6 @@ namespace AuthorsWebApi.Controllers
             this.mapper = mapper;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
         public async Task<ActionResult<List<AuthorDTO>>> GetAll()
         {

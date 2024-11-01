@@ -1,6 +1,8 @@
 ﻿using AuthorsWebApi.DTOs;
 using AuthorsWebApi.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +10,7 @@ namespace AuthorsWebApi.Controllers
 {
     [ApiController]
     [Route("api/books/{bookId:int}/comments")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CommentsController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
