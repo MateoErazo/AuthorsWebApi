@@ -64,6 +64,25 @@ namespace AuthorsWebApi.Controllers
 
             return BadRequest("Incorrect login.");
         }
+
+        [HttpGet("refresh-token")]
+        public ActionResult<AccountCreationResponseDTO> RefreshToken()
+        {
+            Claim emailClaim = HttpContext.User.Claims.Where(claim => claim.Type == "email").FirstOrDefault();
+
+            if(emailClaim == null)
+            {
+                return NotFound("Please log in and try again.");
+            }
+
+            string email = emailClaim.Value;
+
+            return BuildToken(new UserCredentialsDTO
+            {
+                Email = email
+            });
+
+        }
         
         private AccountCreationResponseDTO BuildToken(UserCredentialsDTO userCredentials)
         {
@@ -74,7 +93,7 @@ namespace AuthorsWebApi.Controllers
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            DateTime expiration = DateTime.UtcNow.AddMinutes(2);
+            DateTime expiration = DateTime.UtcNow.AddMinutes(30);
 
             var securityToken = new JwtSecurityToken(
                 issuer: null, audience: null, claims:claims, expires: expiration, signingCredentials: creds
