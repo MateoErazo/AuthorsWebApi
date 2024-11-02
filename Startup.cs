@@ -1,8 +1,8 @@
 ﻿using AuthorsWebApi.Filters;
-using AuthorsWebApi.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -14,6 +14,7 @@ namespace AuthorsWebApi
     {
         public Startup(IConfiguration configuration)
         {
+            JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
             Configuration = configuration;
         }
 

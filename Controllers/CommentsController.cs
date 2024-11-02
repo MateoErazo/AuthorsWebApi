@@ -3,8 +3,10 @@ using AuthorsWebApi.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AuthorsWebApi.Controllers
 {
@@ -15,11 +17,16 @@ namespace AuthorsWebApi.Controllers
     {
         private readonly ApplicationDbContext dbContext;
         private readonly IMapper mapper;
+        private readonly UserManager<IdentityUser> userManager;
 
-        public CommentsController(ApplicationDbContext dbContext, IMapper mapper)
+        public CommentsController(
+            ApplicationDbContext dbContext, 
+            IMapper mapper,
+            UserManager<IdentityUser> userManager)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
+            this.userManager = userManager;
         }
 
         [HttpGet]
@@ -63,8 +70,15 @@ namespace AuthorsWebApi.Controllers
                 return NotFound($"Does not exist a book with id {bookId}");
             }
 
+            Claim emailClaim = HttpContext.User.Claims.Where(x => x.Type == "email").FirstOrDefault();
+            string email = emailClaim.Value;
+
+            IdentityUser user = await userManager.FindByEmailAsync(email);
+            string userId = user.Id;
+
             Comment comment = mapper.Map<Comment>(commentCreationDTO);
             comment.BookId = bookId;
+            comment.UserId = userId;
             dbContext.Add(comment);
             await dbContext.SaveChangesAsync();
 
