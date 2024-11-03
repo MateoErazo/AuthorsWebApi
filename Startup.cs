@@ -100,6 +100,8 @@ namespace AuthorsWebApi
                     }).AllowAnyMethod().AllowAnyHeader();
                 });
             });
+
+            services.AddDataProtection();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)

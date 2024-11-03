@@ -1,6 +1,7 @@
 ﻿using AuthorsWebApi.DTOs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -18,16 +19,19 @@ namespace AuthorsWebApi.Controllers
         private readonly UserManager<IdentityUser> userManager;
         private readonly SignInManager<IdentityUser> signInManager;
         private readonly IConfiguration configuration;
+        private readonly IDataProtector dataProtector;
 
         public AccountsController(
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
-            IConfiguration configuration
+            IConfiguration configuration,
+            IDataProtectionProvider dataProtectionProvider
             )
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.configuration = configuration;
+            this.dataProtector = dataProtectionProvider.CreateProtector(configuration["DataProtectionKey"]);
         }
 
         [HttpPost("create")]
@@ -137,6 +141,34 @@ namespace AuthorsWebApi.Controllers
 
             await userManager.RemoveClaimAsync(user, new Claim("isAdmin","1"));
             return NoContent();
+        }
+
+        [HttpPost("encrypt-message")]
+        public ActionResult EncryptMessage(string message)
+        {
+            string encrypted = dataProtector.Protect(message);
+            string dicrypted = dataProtector.Unprotect(encrypted);
+            return Ok(new
+            {
+                plainText = message,
+                encrypted = encrypted,
+                decrypted = dicrypted
+            });
+        }
+
+        [HttpPost("encryption-time")]
+        public ActionResult EncryptWithTime(string message)
+        {
+            ITimeLimitedDataProtector dataProtectorTime = dataProtector.ToTimeLimitedDataProtector();
+            string encrypted = dataProtectorTime.Protect(message, lifetime: TimeSpan.FromSeconds(4));
+            Thread.Sleep(TimeSpan.FromSeconds(5));
+            string decrypted = dataProtectorTime.Unprotect(encrypted);
+            return Ok(new
+            {
+                message = message,
+                encrypted = encrypted,
+                decrypted = decrypted
+            });
         }
 
     }
