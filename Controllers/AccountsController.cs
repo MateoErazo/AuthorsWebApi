@@ -12,7 +12,7 @@ namespace AuthorsWebApi.Controllers
 {
     [ApiController]
     [Route("api/accounts")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
     public class AccountsController:ControllerBase
     {
         private readonly UserManager<IdentityUser> userManager;
@@ -41,7 +41,7 @@ namespace AuthorsWebApi.Controllers
             var creationResult = await userManager.CreateAsync(user, userCredentials.Password);
 
             if (creationResult.Succeeded) {
-                return BuildToken(userCredentials);
+                return await BuildToken(userCredentials);
             }
             else
             {
@@ -59,14 +59,14 @@ namespace AuthorsWebApi.Controllers
             );
 
             if (result.Succeeded) {
-                return BuildToken(userCredentialsDTO);
+                return await BuildToken(userCredentialsDTO);
             }
 
             return BadRequest("Incorrect login.");
         }
 
         [HttpGet("refresh-token")]
-        public ActionResult<AccountCreationResponseDTO> RefreshToken()
+        public async Task<ActionResult<AccountCreationResponseDTO>> RefreshToken()
         {
             Claim emailClaim = HttpContext.User.Claims.Where(claim => claim.Type == "email").FirstOrDefault();
 
@@ -77,19 +77,23 @@ namespace AuthorsWebApi.Controllers
 
             string email = emailClaim.Value;
 
-            return BuildToken(new UserCredentialsDTO
+            return await BuildToken(new UserCredentialsDTO
             {
                 Email = email
             });
 
         }
         
-        private AccountCreationResponseDTO BuildToken(UserCredentialsDTO userCredentials)
+        private async Task<AccountCreationResponseDTO> BuildToken(UserCredentialsDTO userCredentials)
         {
             List<Claim> claims = new List<Claim>()
             {
                 new Claim("email",userCredentials.Email)
             };
+
+            IdentityUser user = await userManager.FindByEmailAsync(userCredentials.Email);
+            var claimsDb = await userManager.GetClaimsAsync(user);
+            claims.AddRange(claimsDb);
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -106,5 +110,34 @@ namespace AuthorsWebApi.Controllers
             };
 
         }
+
+        [HttpPost("set-admin")]
+        public async Task<ActionResult> SetAdmin(UserAdminEditDTO userAdminEditDTO)
+        {
+            IdentityUser user = await userManager.FindByEmailAsync(userAdminEditDTO.Email);
+
+            if(user == null)
+            {
+                return NotFound($"Don't exist a user with email {userAdminEditDTO.Email}.");
+            }
+
+            await userManager.AddClaimAsync(user, new Claim("isAdmin","1"));
+            return NoContent();
+        }
+
+        [HttpPost("remove-admin")]
+        public async Task<ActionResult> RemoveAdmin(UserAdminEditDTO userAdminEditDTO)
+        {
+            IdentityUser user = await userManager.FindByEmailAsync(userAdminEditDTO.Email);
+
+            if (user == null)
+            {
+                return NotFound($"Don't exist a user with email {userAdminEditDTO.Email}.");
+            }
+
+            await userManager.RemoveClaimAsync(user, new Claim("isAdmin","1"));
+            return NoContent();
+        }
+
     }
 }
