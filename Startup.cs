@@ -1,4 +1,5 @@
 ﻿using AuthorsWebApi.Filters;
+using AuthorsWebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -102,6 +103,8 @@ namespace AuthorsWebApi
             });
 
             services.AddDataProtection();
+
+            services.AddTransient<HashService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)

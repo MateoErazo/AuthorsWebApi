@@ -1,4 +1,5 @@
 ﻿using AuthorsWebApi.DTOs;
+using AuthorsWebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -19,18 +20,21 @@ namespace AuthorsWebApi.Controllers
         private readonly UserManager<IdentityUser> userManager;
         private readonly SignInManager<IdentityUser> signInManager;
         private readonly IConfiguration configuration;
+        private readonly HashService hashService;
         private readonly IDataProtector dataProtector;
 
         public AccountsController(
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
             IConfiguration configuration,
-            IDataProtectionProvider dataProtectionProvider
+            IDataProtectionProvider dataProtectionProvider,
+            HashService hashService
             )
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.configuration = configuration;
+            this.hashService = hashService;
             this.dataProtector = dataProtectionProvider.CreateProtector(configuration["DataProtectionKey"]);
         }
 
@@ -143,7 +147,7 @@ namespace AuthorsWebApi.Controllers
             return NoContent();
         }
 
-        [HttpPost("encrypt-message")]
+        [HttpGet("encrypt-message")]
         public ActionResult EncryptMessage(string message)
         {
             string encrypted = dataProtector.Protect(message);
@@ -156,7 +160,7 @@ namespace AuthorsWebApi.Controllers
             });
         }
 
-        [HttpPost("encryption-time")]
+        [HttpGet("encryption-time")]
         public ActionResult EncryptWithTime(string message)
         {
             ITimeLimitedDataProtector dataProtectorTime = dataProtector.ToTimeLimitedDataProtector();
@@ -169,6 +173,21 @@ namespace AuthorsWebApi.Controllers
                 encrypted = encrypted,
                 decrypted = decrypted
             });
+        }
+
+        [HttpGet("hash-plain-text")]
+        public ActionResult HashPlainText(string plainText)
+        {
+            HashResultDTO hash1 = hashService.Hash(plainText);
+            HashResultDTO hash2 = hashService.Hash(plainText);
+
+            return Ok(new
+            {
+                plainText = plainText,
+                hash1 = hash1,
+                hash2 = hash2
+            });
+
         }
 
     }
