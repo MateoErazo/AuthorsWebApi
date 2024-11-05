@@ -1,5 +1,6 @@
 ﻿using AuthorsWebApi.DTOs;
 using AuthorsWebApi.Entities;
+using AuthorsWebApi.Filters;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -23,36 +24,18 @@ namespace AuthorsWebApi.Controllers
         }
 
         [HttpGet(Name = "getAuthors")]
-        public async Task<ActionResult<ResourcesCollection<AuthorDTO>>> GetAll()
+        [ServiceFilter(typeof(HATEOASAuthorFilterAttribute))]
+        public async Task<ActionResult<List<AuthorDTO>>> GetAll([FromHeader] string includeHATEOAS)
         {
             List<Author> authors = await dbContext.Authors
                 .ToListAsync();
 
-            List<AuthorDTO> authorsDTO = mapper.Map<List<AuthorDTO>>(authors);
-
-            authorsDTO.ForEach(authorDTO => GenerateLinks(authorDTO));
-
-            List<DataHATEOAS> links = new List<DataHATEOAS>();
-
-
-            links.Add(new DataHATEOAS(
-                link: Url.Link("getAuthors", new { }),
-                description: "self",
-                method: "GET"));
-
-            links.Add(new DataHATEOAS(
-                link: Url.Link("createAuthor", new {}), 
-                description: "author-create",
-                method: "POST"));
-
-            return new ResourcesCollection<AuthorDTO> {
-                Values = authorsDTO,
-                Links = links
-            };
+            return mapper.Map<List<AuthorDTO>>(authors);            
         }
 
         [HttpGet("{id:int}",Name ="getAuthorById")]
-        public async Task<ActionResult<AuthorWithBooksDTO>> GetById(int id)
+        [ServiceFilter(typeof(HATEOASAuthorFilterAttribute))]
+        public async Task<ActionResult<AuthorWithBooksDTO>> GetById(int id, [FromHeader] string includeHATEOAS)
         {
             Author author = await dbContext.Authors
                 .Include(x => x.BookAuthor)
@@ -68,31 +51,7 @@ namespace AuthorsWebApi.Controllers
 
             AuthorWithBooksDTO authors = mapper.Map<AuthorWithBooksDTO>(author);
 
-            GenerateLinks(authors);
             return authors;
-        }
-
-        private void GenerateLinks(AuthorDTO authorDTO)
-        {
-            authorDTO.Links.Add(new DataHATEOAS(
-                link: Url.Link("getAuthorById", new {id = authorDTO.Id}), 
-                description:"self", 
-                method: "GET"));
-
-            authorDTO.Links.Add(new DataHATEOAS(
-                link: Url.Link("getAuthorsByName", new { name = authorDTO.Name }),
-                description: "author-get",
-                method: "GET"));
-
-            authorDTO.Links.Add(new DataHATEOAS(
-                link: Url.Link("updateAuthorById", new { id = authorDTO.Id }),
-                description: "author-update",
-                method: "PUT"));
-
-            authorDTO.Links.Add(new DataHATEOAS(
-                link: Url.Link("deleteAuthorById", new { id = authorDTO.Id }),
-                description: "author-delete",
-                method: "DELETE"));
         }
 
         [HttpGet("{name}", Name ="getAuthorsByName")]
