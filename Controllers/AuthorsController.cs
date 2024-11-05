@@ -23,11 +23,32 @@ namespace AuthorsWebApi.Controllers
         }
 
         [HttpGet(Name = "getAuthors")]
-        public async Task<ActionResult<List<AuthorDTO>>> GetAll()
+        public async Task<ActionResult<ResourcesCollection<AuthorDTO>>> GetAll()
         {
             List<Author> authors = await dbContext.Authors
                 .ToListAsync();
-            return mapper.Map<List<AuthorDTO>>(authors);
+
+            List<AuthorDTO> authorsDTO = mapper.Map<List<AuthorDTO>>(authors);
+
+            authorsDTO.ForEach(authorDTO => GenerateLinks(authorDTO));
+
+            List<DataHATEOAS> links = new List<DataHATEOAS>();
+
+
+            links.Add(new DataHATEOAS(
+                link: Url.Link("getAuthors", new { }),
+                description: "self",
+                method: "GET"));
+
+            links.Add(new DataHATEOAS(
+                link: Url.Link("createAuthor", new {}), 
+                description: "author-create",
+                method: "POST"));
+
+            return new ResourcesCollection<AuthorDTO> {
+                Values = authorsDTO,
+                Links = links
+            };
         }
 
         [HttpGet("{id:int}",Name ="getAuthorById")]
@@ -45,7 +66,33 @@ namespace AuthorsWebApi.Controllers
 
             author.BookAuthor = author.BookAuthor.OrderBy(x => x.Order).ToList();
 
-            return mapper.Map<AuthorWithBooksDTO>(author);
+            AuthorWithBooksDTO authors = mapper.Map<AuthorWithBooksDTO>(author);
+
+            GenerateLinks(authors);
+            return authors;
+        }
+
+        private void GenerateLinks(AuthorDTO authorDTO)
+        {
+            authorDTO.Links.Add(new DataHATEOAS(
+                link: Url.Link("getAuthorById", new {id = authorDTO.Id}), 
+                description:"self", 
+                method: "GET"));
+
+            authorDTO.Links.Add(new DataHATEOAS(
+                link: Url.Link("getAuthorsByName", new { name = authorDTO.Name }),
+                description: "author-get",
+                method: "GET"));
+
+            authorDTO.Links.Add(new DataHATEOAS(
+                link: Url.Link("updateAuthorById", new { id = authorDTO.Id }),
+                description: "author-update",
+                method: "PUT"));
+
+            authorDTO.Links.Add(new DataHATEOAS(
+                link: Url.Link("deleteAuthorById", new { id = authorDTO.Id }),
+                description: "author-delete",
+                method: "DELETE"));
         }
 
         [HttpGet("{name}", Name ="getAuthorsByName")]
