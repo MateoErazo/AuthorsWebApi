@@ -22,7 +22,7 @@ namespace AuthorsWebApi.Controllers
             this.mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpGet(Name = "getAuthors")]
         public async Task<ActionResult<List<AuthorDTO>>> GetAll()
         {
             List<Author> authors = await dbContext.Authors
@@ -30,7 +30,7 @@ namespace AuthorsWebApi.Controllers
             return mapper.Map<List<AuthorDTO>>(authors);
         }
 
-        [HttpGet("{id:int}",Name ="GetAuthorById")]
+        [HttpGet("{id:int}",Name ="getAuthorById")]
         public async Task<ActionResult<AuthorWithBooksDTO>> GetById(int id)
         {
             Author author = await dbContext.Authors
@@ -48,7 +48,7 @@ namespace AuthorsWebApi.Controllers
             return mapper.Map<AuthorWithBooksDTO>(author);
         }
 
-        [HttpGet("{name}")]
+        [HttpGet("{name}", Name ="getAuthorsByName")]
         public async Task<List<AuthorDTO>> GetAuthorsByName(string name)
         {
             List<Author> authors = await dbContext.Authors
@@ -59,7 +59,7 @@ namespace AuthorsWebApi.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost(Name = "createAuthor")]
         public async Task<ActionResult> CreateNew(AuthorCreationDTO authorCreationDTO)
         {
             Author author = mapper.Map<Author>(authorCreationDTO);
@@ -67,10 +67,10 @@ namespace AuthorsWebApi.Controllers
             await dbContext.SaveChangesAsync();
 
             AuthorDTO authorDTO = mapper.Map<AuthorDTO>(author);
-            return CreatedAtRoute("GetAuthorById",new {id = author.Id}, authorDTO);
+            return CreatedAtRoute("getAuthorById",new {id = author.Id}, authorDTO);
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:int}", Name = "updateAuthorById")]
         public async Task<ActionResult> Update(AuthorCreationDTO authorCreationDTO, int id)
         {
 
@@ -88,7 +88,7 @@ namespace AuthorsWebApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:int}", Name ="deleteAuthorById")]
         public async Task<ActionResult> Delete(int id)
         {
             bool authorExist = await dbContext.Authors.AnyAsync(author => author.Id == id);

@@ -29,7 +29,7 @@ namespace AuthorsWebApi.Controllers
             this.userManager = userManager;
         }
 
-        [HttpGet]
+        [HttpGet(Name ="getCommentsByBookId")]
         public async Task<ActionResult<List<CommentDTO>>> GetAllCommentsByBookId(int bookId)
         {
             bool bookExist = await dbContext.Books.AnyAsync(x => x.Id == bookId);
@@ -47,7 +47,7 @@ namespace AuthorsWebApi.Controllers
             return mapper.Map<List<CommentDTO>>(comments);
         }
 
-        [HttpGet("{id:int}", Name ="GetCommentById")]
+        [HttpGet("{id:int}", Name ="getCommentById")]
         public async Task<ActionResult<CommentWithBookDTO>> GetCommentById(int id)
         {
             Comment comment = await dbContext.Comments
@@ -61,7 +61,7 @@ namespace AuthorsWebApi.Controllers
             return mapper.Map<CommentWithBookDTO>(comment);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "createCommentByBookId")]
         public async Task<ActionResult> Create(int bookId, CommentCreationDTO commentCreationDTO)
         {
             bool bookExist = await dbContext.Books.AnyAsync(x => x.Id == bookId);
@@ -83,10 +83,10 @@ namespace AuthorsWebApi.Controllers
             await dbContext.SaveChangesAsync();
 
             CommentDTO commentDTO = mapper.Map<CommentDTO>(comment);
-            return CreatedAtRoute("GetCommentById", new {bookId = comment.BookId, id = comment.Id}, commentDTO);
+            return CreatedAtRoute("getCommentById", new {bookId = comment.BookId, id = comment.Id}, commentDTO);
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:int}", Name ="updateCommentByBookIdCommentId")]
         public async Task<ActionResult> UpdateComment(int bookId, int id, CommentCreationDTO commentCreationDTO)
         {
             bool bookExist = await dbContext.Books.AnyAsync(x => x.Id == bookId);
