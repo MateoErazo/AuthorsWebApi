@@ -23,7 +23,7 @@ namespace AuthorsWebApi.Controllers
             this.mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpGet (Name = "getBooks")]
         public async Task<List<BookDTO>> GetAll()
         {
             List<Book> books = await dbContext.Books.ToListAsync();
@@ -31,7 +31,7 @@ namespace AuthorsWebApi.Controllers
         }
 
 
-        [HttpGet("{id:int}", Name ="GetBookById")]
+        [HttpGet("{id:int}", Name ="getBookById")]
         public async Task<ActionResult<BookWithAuthorsDTO>> GetBookById(int id)
         {
             Book book = await dbContext.Books
@@ -48,7 +48,7 @@ namespace AuthorsWebApi.Controllers
             return mapper.Map<BookWithAuthorsDTO>(book);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "createBook")]
         public async Task<ActionResult> Create(BookCreationDTO bookCreationDTO)
         {
             if(bookCreationDTO.AuthorIds == null || bookCreationDTO.AuthorIds.Count == 0)
@@ -78,10 +78,10 @@ namespace AuthorsWebApi.Controllers
             dbContext.Add(book);
             await dbContext.SaveChangesAsync();
             BookDTO bookDTO = mapper.Map<BookDTO>(book);
-            return CreatedAtRoute("GetBookById", new {id = book.Id}, bookDTO);
+            return CreatedAtRoute("getBookById", new {id = book.Id}, bookDTO);
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:int}", Name ="updateBookById")]
         public async Task<ActionResult> Update(int id, BookCreationDTO bookCreationDTO)
         {
             Book book = await dbContext.Books
@@ -99,7 +99,7 @@ namespace AuthorsWebApi.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id:int}")]
+        [HttpPatch("{id:int}", Name = "partialUpdateBookById")]
         public async Task<ActionResult> PartialUpdate(int id, JsonPatchDocument<BookPatchDTO> patchDocument)
         {
             if (patchDocument == null)
@@ -127,7 +127,7 @@ namespace AuthorsWebApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:int}", Name ="deleteBookById")]
         public async Task<ActionResult> Delete(int id)
         {
             bool bookExist = await dbContext.Books.AnyAsync(x => x.Id == id);

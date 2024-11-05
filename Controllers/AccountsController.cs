@@ -15,7 +15,7 @@ namespace AuthorsWebApi.Controllers
     [ApiController]
     [Route("api/accounts")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
-    public class AccountsController:ControllerBase
+    public class AccountsController : ControllerBase
     {
         private readonly UserManager<IdentityUser> userManager;
         private readonly SignInManager<IdentityUser> signInManager;
@@ -38,12 +38,12 @@ namespace AuthorsWebApi.Controllers
             this.dataProtector = dataProtectionProvider.CreateProtector(configuration["DataProtectionKey"]);
         }
 
-        [HttpPost("create")]
+        [HttpPost("create", Name = "createAccount")]
         public async Task<ActionResult<AccountCreationResponseDTO>> Create(UserCredentialsDTO userCredentials)
         {
             IdentityUser user = new IdentityUser() {
-                UserName=userCredentials.Email,
-                Email = userCredentials.Email 
+                UserName = userCredentials.Email,
+                Email = userCredentials.Email
             };
 
             var creationResult = await userManager.CreateAsync(user, userCredentials.Password);
@@ -58,12 +58,12 @@ namespace AuthorsWebApi.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("login")]
+        [HttpPost("login", Name = "createLogin")]
         public async Task<ActionResult<AccountCreationResponseDTO>> Login(UserCredentialsDTO userCredentialsDTO)
         {
             var result = await signInManager.PasswordSignInAsync(
-                userName: userCredentialsDTO.Email, password: userCredentialsDTO.Password, 
-                isPersistent:false, lockoutOnFailure: false
+                userName: userCredentialsDTO.Email, password: userCredentialsDTO.Password,
+                isPersistent: false, lockoutOnFailure: false
             );
 
             if (result.Succeeded) {
@@ -73,12 +73,12 @@ namespace AuthorsWebApi.Controllers
             return BadRequest("Incorrect login.");
         }
 
-        [HttpGet("refresh-token")]
+        [HttpGet("refresh-token", Name = "getRefreshToken")]
         public async Task<ActionResult<AccountCreationResponseDTO>> RefreshToken()
         {
             Claim emailClaim = HttpContext.User.Claims.Where(claim => claim.Type == "email").FirstOrDefault();
 
-            if(emailClaim == null)
+            if (emailClaim == null)
             {
                 return NotFound("Please log in and try again.");
             }
@@ -91,7 +91,7 @@ namespace AuthorsWebApi.Controllers
             });
 
         }
-        
+
         private async Task<AccountCreationResponseDTO> BuildToken(UserCredentialsDTO userCredentials)
         {
             List<Claim> claims = new List<Claim>()
@@ -108,7 +108,7 @@ namespace AuthorsWebApi.Controllers
             DateTime expiration = DateTime.UtcNow.AddMinutes(30);
 
             var securityToken = new JwtSecurityToken(
-                issuer: null, audience: null, claims:claims, expires: expiration, signingCredentials: creds
+                issuer: null, audience: null, claims: claims, expires: expiration, signingCredentials: creds
             );
 
             return new AccountCreationResponseDTO()
@@ -119,22 +119,8 @@ namespace AuthorsWebApi.Controllers
 
         }
 
-        [HttpPost("set-admin")]
+        [HttpPost("set-admin", Name = "createAdmin")]
         public async Task<ActionResult> SetAdmin(UserAdminEditDTO userAdminEditDTO)
-        {
-            IdentityUser user = await userManager.FindByEmailAsync(userAdminEditDTO.Email);
-
-            if(user == null)
-            {
-                return NotFound($"Don't exist a user with email {userAdminEditDTO.Email}.");
-            }
-
-            await userManager.AddClaimAsync(user, new Claim("isAdmin","1"));
-            return NoContent();
-        }
-
-        [HttpPost("remove-admin")]
-        public async Task<ActionResult> RemoveAdmin(UserAdminEditDTO userAdminEditDTO)
         {
             IdentityUser user = await userManager.FindByEmailAsync(userAdminEditDTO.Email);
 
@@ -143,11 +129,26 @@ namespace AuthorsWebApi.Controllers
                 return NotFound($"Don't exist a user with email {userAdminEditDTO.Email}.");
             }
 
-            await userManager.RemoveClaimAsync(user, new Claim("isAdmin","1"));
+            await userManager.AddClaimAsync(user, new Claim("isAdmin", "1"));
             return NoContent();
         }
 
-        [HttpGet("encrypt-message")]
+        [HttpPost("remove-admin", Name = "deleteAdmin")]
+        public async Task<ActionResult> DeleteAdmin(UserAdminEditDTO userAdminEditDTO)
+        {
+            IdentityUser user = await userManager.FindByEmailAsync(userAdminEditDTO.Email);
+
+            if (user == null)
+            {
+                return NotFound($"Don't exist a user with email {userAdminEditDTO.Email}.");
+            }
+
+            await userManager.RemoveClaimAsync(user, new Claim("isAdmin", "1"));
+            return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("encrypt-message", Name ="getEncryptMessage")]
         public ActionResult EncryptMessage(string message)
         {
             string encrypted = dataProtector.Protect(message);
@@ -160,7 +161,8 @@ namespace AuthorsWebApi.Controllers
             });
         }
 
-        [HttpGet("encryption-time")]
+        [AllowAnonymous]
+        [HttpGet("encryption-time", Name = "getEncryptWithTime")]
         public ActionResult EncryptWithTime(string message)
         {
             ITimeLimitedDataProtector dataProtectorTime = dataProtector.ToTimeLimitedDataProtector();
@@ -175,7 +177,8 @@ namespace AuthorsWebApi.Controllers
             });
         }
 
-        [HttpGet("hash-plain-text")]
+        [AllowAnonymous]
+        [HttpGet("hash-plain-text", Name = "getHashPlainText")]
         public ActionResult HashPlainText(string plainText)
         {
             HashResultDTO hash1 = hashService.Hash(plainText);
