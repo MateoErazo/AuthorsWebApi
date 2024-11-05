@@ -2,6 +2,7 @@
 using AuthorsWebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -105,6 +106,10 @@ namespace AuthorsWebApi
             services.AddDataProtection();
 
             services.AddTransient<HashService>();
+
+            services.AddTransient<LinksGenerator>();
+            services.AddTransient<HATEOASAuthorFilterAttribute>();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
