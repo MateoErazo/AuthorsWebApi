@@ -25,7 +25,7 @@ namespace AuthorsWebApi.Controllers
 
         [HttpGet(Name = "getAuthors")]
         [ServiceFilter(typeof(HATEOASAuthorFilterAttribute))]
-        public async Task<ActionResult<List<AuthorDTO>>> GetAll([FromHeader] string includeHATEOAS)
+        public async Task<ActionResult<List<AuthorDTO>>> GetAll()
         {
             List<Author> authors = await dbContext.Authors
                 .ToListAsync();
@@ -35,7 +35,7 @@ namespace AuthorsWebApi.Controllers
 
         [HttpGet("{id:int}",Name ="getAuthorById")]
         [ServiceFilter(typeof(HATEOASAuthorFilterAttribute))]
-        public async Task<ActionResult<AuthorWithBooksDTO>> GetById(int id, [FromHeader] string includeHATEOAS)
+        public async Task<ActionResult<AuthorWithBooksDTO>> GetById(int id)
         {
             Author author = await dbContext.Authors
                 .Include(x => x.BookAuthor)

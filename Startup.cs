@@ -78,6 +78,8 @@ namespace AuthorsWebApi
                         new string[]{}
                     }
                 });
+
+                c.OperationFilter<AddHeaderHATEOAS>();
             });
 
             services.AddIdentity<IdentityUser, IdentityRole>()
