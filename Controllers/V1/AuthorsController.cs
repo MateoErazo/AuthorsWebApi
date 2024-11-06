@@ -7,33 +7,33 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthorsWebApi.Controllers
+namespace AuthorsWebApi.Controllers.V1
 {
     [ApiController]
-    [Route("api/authors")]
+    [Route("api/v1/authors")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AuthorsController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
         private readonly IMapper mapper;
 
-        public AuthorsController(ApplicationDbContext dbContext, IMapper mapper) 
+        public AuthorsController(ApplicationDbContext dbContext, IMapper mapper)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
         }
 
-        [HttpGet(Name = "getAuthors")]
+        [HttpGet(Name = "getAuthorsV1")]
         [ServiceFilter(typeof(HATEOASAuthorFilterAttribute))]
         public async Task<ActionResult<List<AuthorDTO>>> GetAll()
         {
             List<Author> authors = await dbContext.Authors
                 .ToListAsync();
 
-            return mapper.Map<List<AuthorDTO>>(authors);            
+            return mapper.Map<List<AuthorDTO>>(authors);
         }
 
-        [HttpGet("{id:int}",Name ="getAuthorById")]
+        [HttpGet("{id:int}", Name = "getAuthorByIdV1")]
         [ServiceFilter(typeof(HATEOASAuthorFilterAttribute))]
         public async Task<ActionResult<AuthorWithBooksDTO>> GetById(int id)
         {
@@ -54,7 +54,7 @@ namespace AuthorsWebApi.Controllers
             return authors;
         }
 
-        [HttpGet("{name}", Name ="getAuthorsByName")]
+        [HttpGet("{name}", Name = "getAuthorsByNameV1")]
         public async Task<List<AuthorDTO>> GetAuthorsByName(string name)
         {
             List<Author> authors = await dbContext.Authors
@@ -65,7 +65,7 @@ namespace AuthorsWebApi.Controllers
         }
 
 
-        [HttpPost(Name = "createAuthor")]
+        [HttpPost(Name = "createAuthorV1")]
         public async Task<ActionResult> CreateNew(AuthorCreationDTO authorCreationDTO)
         {
             Author author = mapper.Map<Author>(authorCreationDTO);
@@ -73,16 +73,17 @@ namespace AuthorsWebApi.Controllers
             await dbContext.SaveChangesAsync();
 
             AuthorDTO authorDTO = mapper.Map<AuthorDTO>(author);
-            return CreatedAtRoute("getAuthorById",new {id = author.Id}, authorDTO);
+            return CreatedAtRoute("getAuthorByIdV1", new { id = author.Id }, authorDTO);
         }
 
-        [HttpPut("{id:int}", Name = "updateAuthorById")]
+        [HttpPut("{id:int}", Name = "updateAuthorByIdV1")]
         public async Task<ActionResult> Update(AuthorCreationDTO authorCreationDTO, int id)
         {
 
             bool authorExist = await dbContext.Authors.AnyAsync(author => author.Id == id);
 
-            if (!authorExist) {
+            if (!authorExist)
+            {
                 return NotFound($"The author with id {id} don't exist.");
             }
 
@@ -94,7 +95,7 @@ namespace AuthorsWebApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id:int}", Name ="deleteAuthorById")]
+        [HttpDelete("{id:int}", Name = "deleteAuthorByIdV1")]
         public async Task<ActionResult> Delete(int id)
         {
             bool authorExist = await dbContext.Authors.AnyAsync(author => author.Id == id);
@@ -104,10 +105,10 @@ namespace AuthorsWebApi.Controllers
                 return NotFound($"The author with id {id} don't exist.");
             }
 
-            dbContext.Remove(new Author() { Id = id});
+            dbContext.Remove(new Author() { Id = id });
             await dbContext.SaveChangesAsync();
             return Ok();
         }
-        
+
     }
 }
