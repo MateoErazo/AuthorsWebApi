@@ -1,5 +1,6 @@
 ﻿using AuthorsWebApi.Filters;
 using AuthorsWebApi.Services;
+using AuthorsWebApi.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -27,6 +28,7 @@ namespace AuthorsWebApi
             services.AddControllers(options =>
             {
                 options.Filters.Add(typeof(MyGlobalExceptionFilter));
+                options.Conventions.Add(new SwaggerGroupByVersion());
             })
                 .AddJsonOptions(options => 
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles)
@@ -55,6 +57,10 @@ namespace AuthorsWebApi
 
             services.AddSwaggerGen( c =>
             {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthorsWebApi", Version = "v1"});
+                c.SwaggerDoc("v2", new OpenApiInfo { Title = "AuthorsWebApi", Version = "v2" });
+
+
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name="Authorization",
@@ -120,7 +126,11 @@ namespace AuthorsWebApi
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI( c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json","AuthorsWebApi v1");
+                    c.SwaggerEndpoint("/swagger/v2/swagger.json", "AuthorsWebApi v2");
+                });
             }
 
             app.UseHttpsRedirection();

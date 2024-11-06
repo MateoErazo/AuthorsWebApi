@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace AuthorsWebApi.Controllers
+namespace AuthorsWebApi.Controllers.V1
 {
     [ApiController]
-    [Route("api/books/{bookId:int}/comments")]
+    [Route("api/v1/books/{bookId:int}/comments")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CommentsController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace AuthorsWebApi.Controllers
         private readonly UserManager<IdentityUser> userManager;
 
         public CommentsController(
-            ApplicationDbContext dbContext, 
+            ApplicationDbContext dbContext,
             IMapper mapper,
             UserManager<IdentityUser> userManager)
         {
@@ -29,7 +29,7 @@ namespace AuthorsWebApi.Controllers
             this.userManager = userManager;
         }
 
-        [HttpGet(Name ="getCommentsByBookId")]
+        [HttpGet(Name = "getCommentsByBookIdV1")]
         public async Task<ActionResult<List<CommentDTO>>> GetAllCommentsByBookId(int bookId)
         {
             bool bookExist = await dbContext.Books.AnyAsync(x => x.Id == bookId);
@@ -47,26 +47,28 @@ namespace AuthorsWebApi.Controllers
             return mapper.Map<List<CommentDTO>>(comments);
         }
 
-        [HttpGet("{id:int}", Name ="getCommentById")]
+        [HttpGet("{id:int}", Name = "getCommentByIdV1")]
         public async Task<ActionResult<CommentWithBookDTO>> GetCommentById(int id)
         {
             Comment comment = await dbContext.Comments
                 .Include(x => x.Book)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
-            if (comment == null) {
+            if (comment == null)
+            {
                 return NotFound($"Don't exist a comment with id {id}.");
             }
 
             return mapper.Map<CommentWithBookDTO>(comment);
         }
 
-        [HttpPost(Name = "createCommentByBookId")]
+        [HttpPost(Name = "createCommentByBookIdV1")]
         public async Task<ActionResult> Create(int bookId, CommentCreationDTO commentCreationDTO)
         {
             bool bookExist = await dbContext.Books.AnyAsync(x => x.Id == bookId);
 
-            if (!bookExist) {
+            if (!bookExist)
+            {
                 return NotFound($"Does not exist a book with id {bookId}");
             }
 
@@ -83,10 +85,10 @@ namespace AuthorsWebApi.Controllers
             await dbContext.SaveChangesAsync();
 
             CommentDTO commentDTO = mapper.Map<CommentDTO>(comment);
-            return CreatedAtRoute("getCommentById", new {bookId = comment.BookId, id = comment.Id}, commentDTO);
+            return CreatedAtRoute("getCommentByIdV1", new { bookId = comment.BookId, id = comment.Id }, commentDTO);
         }
 
-        [HttpPut("{id:int}", Name ="updateCommentByBookIdCommentId")]
+        [HttpPut("{id:int}", Name = "updateCommentByBookIdCommentIdV1")]
         public async Task<ActionResult> UpdateComment(int bookId, int id, CommentCreationDTO commentCreationDTO)
         {
             bool bookExist = await dbContext.Books.AnyAsync(x => x.Id == bookId);
@@ -98,7 +100,8 @@ namespace AuthorsWebApi.Controllers
 
             bool commentExist = await dbContext.Comments.AnyAsync(x => x.Id == id);
 
-            if (!commentExist) {
+            if (!commentExist)
+            {
                 return NotFound($"Don't exist a comment with id {id}.");
             }
 

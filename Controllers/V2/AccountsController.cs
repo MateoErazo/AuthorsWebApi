@@ -10,10 +10,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace AuthorsWebApi.Controllers
+namespace AuthorsWebApi.Controllers.V2
 {
     [ApiController]
-    [Route("api/accounts")]
+    [Route("api/v2/accounts")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
     public class AccountsController : ControllerBase
     {
@@ -35,20 +35,22 @@ namespace AuthorsWebApi.Controllers
             this.signInManager = signInManager;
             this.configuration = configuration;
             this.hashService = hashService;
-            this.dataProtector = dataProtectionProvider.CreateProtector(configuration["DataProtectionKey"]);
+            dataProtector = dataProtectionProvider.CreateProtector(configuration["DataProtectionKey"]);
         }
 
-        [HttpPost("create", Name = "createAccount")]
+        [HttpPost("create", Name = "createAccountV2")]
         public async Task<ActionResult<AccountCreationResponseDTO>> Create(UserCredentialsDTO userCredentials)
         {
-            IdentityUser user = new IdentityUser() {
+            IdentityUser user = new IdentityUser()
+            {
                 UserName = userCredentials.Email,
                 Email = userCredentials.Email
             };
 
             var creationResult = await userManager.CreateAsync(user, userCredentials.Password);
 
-            if (creationResult.Succeeded) {
+            if (creationResult.Succeeded)
+            {
                 return await BuildToken(userCredentials);
             }
             else
@@ -58,7 +60,7 @@ namespace AuthorsWebApi.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("login", Name = "createLogin")]
+        [HttpPost("login", Name = "createLoginV2")]
         public async Task<ActionResult<AccountCreationResponseDTO>> Login(UserCredentialsDTO userCredentialsDTO)
         {
             var result = await signInManager.PasswordSignInAsync(
@@ -66,14 +68,15 @@ namespace AuthorsWebApi.Controllers
                 isPersistent: false, lockoutOnFailure: false
             );
 
-            if (result.Succeeded) {
+            if (result.Succeeded)
+            {
                 return await BuildToken(userCredentialsDTO);
             }
 
             return BadRequest("Incorrect login.");
         }
 
-        [HttpGet("refresh-token", Name = "getRefreshToken")]
+        [HttpGet("refresh-token", Name = "getRefreshTokenV2")]
         public async Task<ActionResult<AccountCreationResponseDTO>> RefreshToken()
         {
             Claim emailClaim = HttpContext.User.Claims.Where(claim => claim.Type == "email").FirstOrDefault();
@@ -119,7 +122,7 @@ namespace AuthorsWebApi.Controllers
 
         }
 
-        [HttpPost("set-admin", Name = "createAdmin")]
+        [HttpPost("set-admin", Name = "createAdminV2")]
         public async Task<ActionResult> SetAdmin(UserAdminEditDTO userAdminEditDTO)
         {
             IdentityUser user = await userManager.FindByEmailAsync(userAdminEditDTO.Email);
@@ -133,7 +136,7 @@ namespace AuthorsWebApi.Controllers
             return NoContent();
         }
 
-        [HttpPost("remove-admin", Name = "deleteAdmin")]
+        [HttpPost("remove-admin", Name = "deleteAdminV2")]
         public async Task<ActionResult> DeleteAdmin(UserAdminEditDTO userAdminEditDTO)
         {
             IdentityUser user = await userManager.FindByEmailAsync(userAdminEditDTO.Email);
@@ -148,7 +151,7 @@ namespace AuthorsWebApi.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("encrypt-message", Name ="getEncryptMessage")]
+        [HttpGet("encrypt-message", Name = "getEncryptMessageV2")]
         public ActionResult EncryptMessage(string message)
         {
             string encrypted = dataProtector.Protect(message);
@@ -156,13 +159,13 @@ namespace AuthorsWebApi.Controllers
             return Ok(new
             {
                 plainText = message,
-                encrypted = encrypted,
+                encrypted,
                 decrypted = dicrypted
             });
         }
 
         [AllowAnonymous]
-        [HttpGet("encryption-time", Name = "getEncryptWithTime")]
+        [HttpGet("encryption-time", Name = "getEncryptWithTimeV2")]
         public ActionResult EncryptWithTime(string message)
         {
             ITimeLimitedDataProtector dataProtectorTime = dataProtector.ToTimeLimitedDataProtector();
@@ -171,14 +174,14 @@ namespace AuthorsWebApi.Controllers
             string decrypted = dataProtectorTime.Unprotect(encrypted);
             return Ok(new
             {
-                message = message,
-                encrypted = encrypted,
-                decrypted = decrypted
+                message,
+                encrypted,
+                decrypted
             });
         }
 
         [AllowAnonymous]
-        [HttpGet("hash-plain-text", Name = "getHashPlainText")]
+        [HttpGet("hash-plain-text", Name = "getHashPlainTextV2")]
         public ActionResult HashPlainText(string plainText)
         {
             HashResultDTO hash1 = hashService.Hash(plainText);
@@ -186,9 +189,9 @@ namespace AuthorsWebApi.Controllers
 
             return Ok(new
             {
-                plainText = plainText,
-                hash1 = hash1,
-                hash2 = hash2
+                plainText,
+                hash1,
+                hash2
             });
 
         }
