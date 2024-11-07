@@ -1,6 +1,7 @@
 ﻿using AuthorsWebApi.DTOs;
 using AuthorsWebApi.Entities;
 using AuthorsWebApi.Filters;
+using AuthorsWebApi.Utils;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -25,9 +26,14 @@ namespace AuthorsWebApi.Controllers.V1
 
         [HttpGet(Name = "getAuthorsV1")]
         [ServiceFilter(typeof(HATEOASAuthorFilterAttribute))]
-        public async Task<ActionResult<List<AuthorDTO>>> GetAll()
+        public async Task<ActionResult<List<AuthorDTO>>> GetAll([FromQuery] PaginationDTO paginationDTO)
         {
-            List<Author> authors = await dbContext.Authors
+            var queryable = dbContext.Authors.AsQueryable();
+            await HttpContext.InsertTotalRecordsInHeader(queryable);
+
+            List<Author> authors = await queryable
+                .OrderBy(author => author.Name)
+                .Paginate(paginationDTO)
                 .ToListAsync();
 
             return mapper.Map<List<AuthorDTO>>(authors);

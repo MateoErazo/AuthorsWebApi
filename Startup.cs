@@ -143,7 +143,8 @@ namespace AuthorsWebApi
                     builder.WithOrigins(new string[]
                     {
                         ""
-                    }).AllowAnyMethod().AllowAnyHeader();
+                    }).AllowAnyMethod().AllowAnyHeader()
+                    .WithExposedHeaders(new string[] { "totalRecords" });
                 });
             });
 
