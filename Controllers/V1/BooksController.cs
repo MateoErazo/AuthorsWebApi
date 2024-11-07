@@ -1,5 +1,6 @@
 ﻿using AuthorsWebApi.DTOs;
 using AuthorsWebApi.Entities;
+using AuthorsWebApi.Utils;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
+using System.Net.WebSockets;
 
 namespace AuthorsWebApi.Controllers.V1
 {
@@ -25,9 +27,14 @@ namespace AuthorsWebApi.Controllers.V1
         }
 
         [HttpGet(Name = "getBooksV1")]
-        public async Task<List<BookDTO>> GetAll()
+        public async Task<List<BookDTO>> GetAll([FromQuery] PaginationDTO paginationDTO)
         {
-            List<Book> books = await dbContext.Books.ToListAsync();
+            var queryable = dbContext.Books.AsQueryable();
+            await HttpContext.InsertTotalRecordsInHeader(queryable);
+            List<Book> books = await queryable
+                .OrderBy(book => book.Title)
+                .Paginate(paginationDTO)
+                .ToListAsync();
             return mapper.Map<List<BookDTO>>(books);
         }
 
