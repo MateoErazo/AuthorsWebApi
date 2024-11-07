@@ -15,7 +15,7 @@ namespace AuthorsWebApi.Validations
 
             if (firstLetter != firstLetter.ToUpper())
             {
-                return new ValidationResult("Sorry, the first letter should be uppercase.");
+                return new ValidationResult("The first letter should be uppercase.");
             }
 
             return ValidationResult.Success;
