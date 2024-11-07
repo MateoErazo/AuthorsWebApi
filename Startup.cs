@@ -3,14 +3,17 @@ using AuthorsWebApi.Services;
 using AuthorsWebApi.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
+[assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace AuthorsWebApi
 {
     public class Startup
@@ -57,8 +60,37 @@ namespace AuthorsWebApi
 
             services.AddSwaggerGen( c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthorsWebApi", Version = "v1"});
-                c.SwaggerDoc("v2", new OpenApiInfo { Title = "AuthorsWebApi", Version = "v2" });
+                c.SwaggerDoc("v1", new OpenApiInfo { 
+                    Title = "AuthorsWebApi", 
+                    Version = "v1",
+                    Description = "This is a web api about authors and books and It was created with educational purposes only.",
+                    Contact = new OpenApiContact
+                    {
+                        Email = "erazojesusmateo@hotmail.com",
+                        Name = "Jesús Mateo Erazo Paladinez",
+                        Url = new Uri("https://github.com/MateoErazo")
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "MIT"
+                    }
+                });
+
+                c.SwaggerDoc("v2", new OpenApiInfo { 
+                    Title = "AuthorsWebApi", 
+                    Version = "v2",
+                    Description = "This is a web api about authors and books and It was created with educational purposes only.",
+                    Contact = new OpenApiContact
+                    {
+                        Email = "erazojesusmateo@hotmail.com",
+                        Name = "Jesús Mateo Erazo Paladinez",
+                        Url = new Uri("https://github.com/MateoErazo")
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "MIT"
+                    }
+                });
 
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -86,6 +118,10 @@ namespace AuthorsWebApi
                 });
 
                 c.OperationFilter<AddHeaderHATEOAS>();
+
+                string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
 
             services.AddIdentity<IdentityUser, IdentityRole>()
