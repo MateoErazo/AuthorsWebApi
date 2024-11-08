@@ -160,15 +160,22 @@ namespace AuthorsWebApi
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
 
-            if (env.IsDevelopment())
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseSwagger();
+            //    app.UseSwaggerUI(c =>
+            //    {
+            //        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AuthorsWebApi v1");
+            //        c.SwaggerEndpoint("/swagger/v2/swagger.json", "AuthorsWebApi v2");
+            //    });
+            //}
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI( c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json","AuthorsWebApi v1");
-                    c.SwaggerEndpoint("/swagger/v2/swagger.json", "AuthorsWebApi v2");
-                });
-            }
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "AuthorsWebApi v1");
+                c.SwaggerEndpoint("/swagger/v2/swagger.json", "AuthorsWebApi v2");
+            });
 
             app.UseHttpsRedirection();
 
