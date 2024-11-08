@@ -38,6 +38,7 @@ namespace AuthorsWebApi.Controllers.V1
             dataProtector = dataProtectionProvider.CreateProtector(configuration["DataProtectionKey"]);
         }
 
+        [AllowAnonymous]
         [HttpPost("create", Name = "createAccountV1")]
         public async Task<ActionResult<AccountCreationResponseDTO>> Create(UserCredentialsDTO userCredentials)
         {
@@ -76,6 +77,7 @@ namespace AuthorsWebApi.Controllers.V1
             return BadRequest("Incorrect login.");
         }
 
+        [AllowAnonymous]
         [HttpGet("refresh-token", Name = "getRefreshTokenV1")]
         public async Task<ActionResult<AccountCreationResponseDTO>> RefreshToken()
         {

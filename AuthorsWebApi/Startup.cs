@@ -1,6 +1,7 @@
 ﻿using AuthorsWebApi.Filters;
 using AuthorsWebApi.Services;
 using AuthorsWebApi.Utils;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -155,6 +156,11 @@ namespace AuthorsWebApi
             services.AddTransient<LinksGenerator>();
             services.AddTransient<HATEOASAuthorFilterAttribute>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+
+            services.AddApplicationInsightsTelemetry(options =>
+            {
+              options.ConnectionString = Configuration["ApplicationInsights:ConnectionString"];
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
