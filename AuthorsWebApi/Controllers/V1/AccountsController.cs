@@ -65,6 +65,11 @@ namespace AuthorsWebApi.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Log in with your user account.
+        /// </summary>
+        /// <param name="userCredentialsDTO">Your user account credentials.</param>
+        /// <returns></returns>
         [AllowAnonymous]
         [HttpPost("login", Name = "createLoginV1")]
         public async Task<ActionResult<AccountCreationResponseDTO>> Login(UserCredentialsDTO userCredentialsDTO)
