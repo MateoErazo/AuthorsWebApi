@@ -38,6 +38,11 @@ namespace AuthorsWebApi.Controllers.V1
             dataProtector = dataProtectionProvider.CreateProtector(configuration["DataProtectionKey"]);
         }
 
+        /// <summary>
+        /// Create a new user account.
+        /// </summary>
+        /// <param name="userCredentials">Credentials for the new account.</param>
+        /// <returns></returns>
         [AllowAnonymous]
         [HttpPost("create", Name = "createAccountV1")]
         public async Task<ActionResult<AccountCreationResponseDTO>> Create(UserCredentialsDTO userCredentials)
